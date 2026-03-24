@@ -1,0 +1,1 @@
+# sparkhack2026-team-all-caps
