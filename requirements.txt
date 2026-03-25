@@ -1,0 +1,8 @@
+torch
+flwr
+streamlit
+cryptography
+scikit-learn
+plotly
+pandas
+numpy
