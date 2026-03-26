@@ -12,7 +12,7 @@ def encrypt(weights):
 
     ciphertext = cipher.encrypt(serialized)
 
-    print("AES-256 encrypted, sending...")
+    print("AES-128 encrypted, sending...")
 
     return ciphertext
 
