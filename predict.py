@@ -5,6 +5,21 @@ from sklearn.preprocessing import StandardScaler
 
 from model.net import Net
 
+FEATURE_NAMES = [
+    "Age",
+    "Sex (1=Male, 0=Female)",
+    "Chest Pain Type (0-3)",
+    "Resting Blood Pressure",
+    "Cholesterol",
+    "Fasting Blood Sugar (>120 mg/dl, 1=True, 0=False)",
+    "Rest ECG (0-2)",
+    "Max Heart Rate",
+    "Exercise Induced Angina (1=Yes, 0=No)",
+    "Oldpeak (ST Depression)",
+    "Slope (0-2)",
+    "Number of Major Vessels (0-3)",
+    "Thal (1-3)"
+]
 
 def load_model():
     model = Net()
