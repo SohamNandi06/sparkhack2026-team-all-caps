@@ -2,6 +2,13 @@ import flwr as fl
 import json
 import os
 import torch
+import random
+import numpy as np
+
+SEED = 42
+np.random.seed(SEED)
+torch.manual_seed(SEED)
+random.seed(SEED)
 
 from flwr.common import parameters_to_ndarrays
 from model.net import Net
@@ -12,16 +19,29 @@ class CustomStrategy(fl.server.strategy.FedAvg):
 
     def __init__(self):
         super().__init__()
-        self.latest_parameters = None 
+        self.latest_parameters = None
 
     def aggregate_fit(self, server_round, results, failures):
+        print("\n🧠 Server aggregating model updates (no raw data received)")
+
         aggregated_parameters, aggregated_metrics = super().aggregate_fit(
             server_round, results, failures
         )
 
         self.latest_parameters = aggregated_parameters
 
-        print(f"Round {server_round} training aggregated")
+        os.makedirs("saved_model", exist_ok=True)
+
+        ndarrays = parameters_to_ndarrays(aggregated_parameters)
+
+        model = Net()
+        params_dict = zip(model.state_dict().keys(), ndarrays)
+        state_dict = {k: torch.tensor(v, dtype=torch.float32) for k, v in params_dict}
+        model.load_state_dict(state_dict)
+
+        torch.save(model.state_dict(), "saved_model/global_model.pth")
+
+        print(f"Round {server_round} aggregated and global model saved")
 
         return aggregated_parameters, aggregated_metrics
 
@@ -48,7 +68,7 @@ class CustomStrategy(fl.server.strategy.FedAvg):
             ndarrays = parameters_to_ndarrays(self.latest_parameters)
 
             params_dict = zip(model.state_dict().keys(), ndarrays)
-            state_dict = {k: torch.tensor(v, dtype=torch.float32) for k, v in params_dict} 
+            state_dict = {k: torch.tensor(v, dtype=torch.float32) for k, v in params_dict}
             model.load_state_dict(state_dict, strict=True)
 
         model.eval()
@@ -83,9 +103,8 @@ class CustomStrategy(fl.server.strategy.FedAvg):
         with open(log_file, "w") as f:
             json.dump(data, f, indent=4)
 
-        print(
-            f"Round {server_round} → Global Acc: {global_acc:.4f}, Loss: {avg_loss:.4f}"
-        )
+        print(f"\n📊 Round {server_round}")
+        print(f"Global Accuracy: {global_acc:.4f}")
         print(f"Individual Accuracies: {individual_accs}")
 
         return avg_loss, {"accuracy": global_acc}

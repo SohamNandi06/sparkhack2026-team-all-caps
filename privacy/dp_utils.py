@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def add_dp_noise(weights, sigma=0.01):   
+def add_dp_noise(weights, sigma=0.005):   
 
     noisy_weights = []
 
